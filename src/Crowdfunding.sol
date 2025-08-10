@@ -36,21 +36,24 @@ contract Crowdfunding is ReentrancyGuard{
         if(block.timestamp > deadline){
             revert TooLate();
         }
+
         if(isReached == true){
             revert GoalReached();
         }
+
         if(msg.value <= 1000){
             revert TooSmallAmount();
         }
+
         if(msg.value + totalAmount >= goal){
             isReached = true;
         }
 
+        emit Donate(msg.sender, msg.value, block.timestamp);
+
         donators[msg.sender] += msg.value;
 
         totalAmount += msg.value;
-
-        emit Donate(msg.sender, msg.value, block.timestamp);
     }
 
     function withdraw() payable public nonReentrant{
@@ -61,8 +64,8 @@ contract Crowdfunding is ReentrancyGuard{
             payable(owner).transfer(address(this).balance);
         }
 
-        totalAmount = 0;
         emit FundsWithdrawn(msg.sender, address(this).balance, block.timestamp);
+        totalAmount = 0;
     }
 
 }
