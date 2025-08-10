@@ -8,7 +8,7 @@ contract CrowdfundingFactoryTest is Test{
     CrowdfundingFactory factory;
 
     address owner = vm.addr(1);
-    address owner = vm.addr(2);
+    address user = vm.addr(2);
     uint256 goal = 100001;
     uint256 duration = 3700;
     string imageUrl = "https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png";
@@ -23,21 +23,22 @@ contract CrowdfundingFactoryTest is Test{
 
     function test_CreateCampaigne() public {
         vm.startPrank(owner);
-        factory.createCampaigne(goal, duration, imageUrl , title, description);
-
+        
         vm.expectEmit(false, false, false, true);
-        emit CampaigneCreated(goal, duration, owner, block.timestamp);
+        emit CrowdfundingFactory.CampaigneCreated(goal, duration, owner, block.timestamp);
+        
+        factory.createCampaigne(goal, duration, imageUrl , title, description);
 
         address[] memory campaignes = factory.getAllCampaignes();
         assertEq(campaignes.length, 1);
 
-        address[] memory userCampaignes = factory.userCampaignes();
-        assertEq(userCampaignes.legnth, 1);
+        address[] memory userCampaignes = factory.getUserCampaignes(owner);
+        assertEq(userCampaignes.length, 1);
 
         vm.stopPrank();
     }
 
-    function test_test_CreateCampaigneRevertsTooSmallGoal(){
+    function test_test_CreateCampaigneRevertsTooSmallGoal() public{
         vm.startPrank(owner);
 
         vm.expectRevert(CrowdfundingFactory.ToSmallGoal.selector);
@@ -46,7 +47,7 @@ contract CrowdfundingFactoryTest is Test{
         vm.stopPrank();
     }
 
-    function test_test_CreateCampaigneRevertsTooSmallDusration(){
+    function test_test_CreateCampaigneRevertsTooSmallDusration() public{
         vm.startPrank(owner);
 
         vm.expectRevert(CrowdfundingFactory.TooSmallDuration.selector);
@@ -64,23 +65,23 @@ contract CrowdfundingFactoryTest is Test{
 
         factory.createCampaigne(goal, duration, imageUrl , title, description);
 
-        address[] memory campaignes = factory.getAllCampaignes();
-        assertEq(campaignes.length, 2);
+        address[] memory campaignes2 = factory.getAllCampaignes();
+        assertEq(campaignes2.length, 2);
 
         vm.stopPrank();
     }
 
-    function getUserCampaignes() public{
+    function test_getUserCampaignes() public{
         vm.startPrank(owner);
         factory.createCampaigne(goal, duration, imageUrl , title, description);
 
-        address[] memory userCampaignes = factory.userCampaignes();
-        assertEq(userCampaignes.legnth, 1);
+        address[] memory userCampaignes = factory.getUserCampaignes(owner);
+        assertEq(userCampaignes.length, 1);
 
         factory.createCampaigne(goal, duration, imageUrl , title, description);
 
-        address[] memory userCampaignes = factory.userCampaignes();
-        assertEq(userCampaignes.legnth, 2);
+        address[] memory userCampaignes2 = factory.getUserCampaignes(owner);
+        assertEq(userCampaignes2.length, 2);
 
         vm.stopPrank();
     }
